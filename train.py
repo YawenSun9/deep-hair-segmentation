@@ -40,8 +40,10 @@ class Trainer(object):
                         {'params': model.get_10x_lr_params(), 'lr': args.lr * 10}]
 
         # Define Optimizer
-        optimizer = torch.optim.SGD(train_params, momentum=args.momentum,
-                                    weight_decay=args.weight_decay, nesterov=args.nesterov)
+#         optimizer = torch.optim.SGD(train_params, momentum=args.momentum,
+#                                     weight_decay=args.weight_decay, nesterov=args.nesterov)
+#         train_params = [{'params': model.get_10x_lr_params(), 'lr': args.lr}]
+        optimizer = torch.optim.Adam(train_params)
 
         # Define Criterion
         # whether to use class balanced weights
