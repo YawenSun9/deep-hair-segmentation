@@ -183,9 +183,9 @@ def main():
     parser.add_argument('--out-stride', type=int, default=16,
                         help='network output stride (default: 8)')
     parser.add_argument('--dataset', type=str, default='pascal',
-                        choices=['pascal', 'coco', 'cityscapes'],
+                        choices=['pascal', 'lfw', 'cityscapes'],
                         help='dataset name (default: pascal)')
-    parser.add_argument('--use-sbd', action='store_true', default=True,
+    parser.add_argument('--use-sbd', action='store_true', default=False,
                         help='whether to use SBD dataset (default: True)')
     parser.add_argument('--workers', type=int, default=4,
                         metavar='N', help='dataloader threads')
@@ -264,7 +264,7 @@ def main():
     # default settings for epochs, batch_size and lr
     if args.epochs is None:
         epoches = {
-            'coco': 30,
+            'lfw': 30,
             'cityscapes': 200,
             'pascal': 50,
         }
@@ -278,7 +278,7 @@ def main():
 
     if args.lr is None:
         lrs = {
-            'coco': 0.1,
+            'lfw': 0.1,
             'cityscapes': 0.01,
             'pascal': 0.007,
         }
