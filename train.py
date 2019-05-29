@@ -13,6 +13,7 @@ from utils.lr_scheduler import LR_Scheduler
 from utils.saver import Saver
 from utils.summaries import TensorboardSummary
 from utils.metrics import Evaluator
+from torch.autograd import Variable
 
 class Trainer(object):
     def __init__(self, args):
@@ -92,6 +93,27 @@ class Trainer(object):
         if args.ft:
             args.start_epoch = 0
 
+    def mixup_data(self, x, y, alpha=0.2, use_cuda=True):
+        '''Returns mixed inputs, pairs of targets, and lambda'''
+        if alpha > 0:
+            lam = np.random.beta(alpha, alpha)
+        else:
+            lam = 1
+
+        batch_size = x.size()[0]
+        if use_cuda:
+            index = torch.randperm(batch_size).cuda()
+        else:
+            index = torch.randperm(batch_size)
+
+        mixed_x = lam * x + (1 - lam) * x[index, :]
+        y_a, y_b = y, y[index]
+        return mixed_x, y_a, y_b, lam
+    
+    def mixup_criterion(self, criterion, pred, y_a, y_b, lam):
+        return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
+
+            
     def training(self, epoch):
         train_loss = 0.0
         self.model.train()
@@ -101,10 +123,21 @@ class Trainer(object):
             image, target = sample['image'], sample['label']
             if self.args.cuda:
                 image, target = image.cuda(), target.cuda()
+            
+            targets_a, targets_b, lam = None, None, None
+            if self.args.use_mixup:
+                image, targets_a, targets_b, lam = self.mixup_data(image, target,
+                                                              self.args.mixup_alpha, self.args.cuda)
+                image, targets_a, targets_b = map(Variable, (image, targets_a, targets_b))
             self.scheduler(self.optimizer, i, epoch, self.best_pred)
             self.optimizer.zero_grad()
             output = self.model(image)
-            loss = self.criterion(output, target)
+
+            if self.args.use_mixup:
+                loss = self.mixup_criterion(self.criterion, output, targets_a, targets_b, lam)
+            else:
+                loss = self.criterion(output, target)
+                
             loss.backward()
             self.optimizer.step()
             train_loss += loss.item()
@@ -249,6 +282,13 @@ def main():
     parser.add_argument('--no-val', action='store_true', default=False,
                         help='skip validation during training')
 
+    # mix up
+    parser.add_argument('--use-mixup', type=bool, default=False,
+                        help='whether to include data mixup (default: False)')
+    parser.add_argument('--mixup-alpha', type=float, default=0.2,
+                        metavar='M', help='alpha (default: 0.2)')
+    
+    
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.cuda:
@@ -280,7 +320,7 @@ def main():
 
     if args.lr is None:
         lrs = {
-            'lfw': 0.1,
+            'lfw': 0.001,
             'cityscapes': 0.01,
             'pascal': 0.007,
         }
@@ -289,6 +329,13 @@ def main():
 
     if args.checkname is None:
         args.checkname = 'deeplab-'+str(args.backbone)
+        
+    if args.use_mixup is None:
+        args.use_mixup = False
+    
+    if args.mixup_alpha is None:
+        args.mixup_alpha = 0.2
+        
     print(args)
     torch.manual_seed(args.seed)
     trainer = Trainer(args)
