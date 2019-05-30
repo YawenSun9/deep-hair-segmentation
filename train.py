@@ -134,6 +134,7 @@ class Trainer(object):
             output = self.model(image)
 
             if self.args.use_mixup:
+                print ("mixed")
                 loss = self.mixup_criterion(self.criterion, output, targets_a, targets_b, lam)
             else:
                 loss = self.criterion(output, target)
