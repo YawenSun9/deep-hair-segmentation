@@ -233,7 +233,7 @@ def main():
     parser.add_argument('--freeze-bn', type=bool, default=False,
                         help='whether to freeze bn parameters (default: False)')
     parser.add_argument('--loss-type', type=str, default='ce',
-                        choices=['ce', 'focal'],
+                        choices=['ce', 'focal', 'hair'],
                         help='loss func type (default: ce)')
     # training hyper params
     parser.add_argument('--epochs', type=int, default=None, metavar='N',
