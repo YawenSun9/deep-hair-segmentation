@@ -23,9 +23,10 @@ class SegmentationLosses(object):
 
     def HairMatLoss(self, logit, target, weight=0.5):
         loss1 = self.CrossEntropyLoss(logit, target)
-        loss2 = weight * self.GradientConsistencyLoss(logit, target)
-        print (loss1, loss2)
-        return  loss1
+        loss2 = weight * self.GradientConsistencyLoss(logit, target.unsqueeze(dim=1))
+#         loss3 = weight * self.GradientConsistencyLoss(logit[:, 1:2, ...], target.unsqueeze(dim=1))
+#         print (loss1, loss2)
+        return  loss1 + weight * loss2
 
 
     def GradientConsistencyLoss(self, logit, target):
@@ -36,10 +37,13 @@ class SegmentationLosses(object):
         if self.cuda:
             sobel_kernel_x = sobel_kernel_x.cuda()
         sobel_kernel_x = sobel_kernel_x.view((1,1,3,3))
-        N, H, W = target.shape
-
-        I_x = F.conv2d(logit[:,1:2, ...], sobel_kernel_x, padding = 1)
-        M_x = F.conv2d(target.view(N,1,H,W), sobel_kernel_x, padding = 1)
+        
+        N = target.shape[0]
+        
+        I_x1 = F.conv2d(logit[:,0:1,...], sobel_kernel_x, padding = 1)
+        I_x2 = F.conv2d(logit[:,1:2,...], sobel_kernel_x, padding = 1)
+        I_x = torch.cat([I_x1, I_x2], dim=1)
+        M_x = F.conv2d(target, sobel_kernel_x, padding = 1)
 
         sobel_kernel_y = torch.Tensor(
                     [[1.0, 2.0, 1.0],
@@ -49,8 +53,10 @@ class SegmentationLosses(object):
             sobel_kernel_y = sobel_kernel_y.cuda()
         sobel_kernel_y = sobel_kernel_y.view((1,1,3,3))
 
-        I_y = F.conv2d(logit[:,1:2, ...], sobel_kernel_y, padding = 1)
-        M_y = F.conv2d(target.view(N,1,H,W), sobel_kernel_y, padding = 1)
+        I_y1 = F.conv2d(logit[:,0:1,...], sobel_kernel_y, padding = 1)
+        I_y2 = F.conv2d(logit[:,1:2,...], sobel_kernel_y, padding = 1)
+        I_y = torch.cat([I_y1, I_y2], dim=1)
+        M_y = F.conv2d(target, sobel_kernel_y, padding = 1)
 
         Imag_pow = torch.pow(I_x,2) + torch.pow(I_y,2) + 1e-30
         Mmag_pow = torch.pow(M_x,2) + torch.pow(M_y,2) + 1e-30
