@@ -5,6 +5,8 @@ class Path(object):
             return './data/VOCdevkit/VOC2012/'  # folder that contains VOCdevkit/.
         elif dataset == 'lfw':
             return './data/Lfw/'  # folder that contains lfw/.
+        elif dataset == 'celebA':
+            return './data/celebA/'
         elif dataset == 'sbd':
             return '/path/to/datasets/benchmark_RELEASE/'  # folder that contains dataset/.
         elif dataset == 'cityscapes':
