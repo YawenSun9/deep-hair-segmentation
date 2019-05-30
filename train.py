@@ -134,7 +134,7 @@ class Trainer(object):
             output = self.model(image)
 
             if self.args.use_mixup:
-                print ("mixed")
+#                 print ("mixed")
                 loss = self.mixup_criterion(self.criterion, output, targets_a, targets_b, lam)
             else:
                 loss = self.criterion(output, target)
@@ -219,7 +219,7 @@ def main():
     parser.add_argument('--out-stride', type=int, default=16,
                         help='network output stride (default: 8)')
     parser.add_argument('--dataset', type=str, default='pascal',
-                        choices=['pascal', 'lfw', 'cityscapes'],
+                        choices=['pascal', 'lfw', 'cityscapes', 'celebA'],
                         help='dataset name (default: pascal)')
     parser.add_argument('--use-sbd', action='store_true', default=False,
                         help='whether to use SBD dataset (default: True)')

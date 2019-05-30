@@ -30,6 +30,9 @@ def decode_segmap(label_mask, dataset, plot=False):
     elif dataset == 'lfw':
         n_classes = 2
         label_colours = get_lfw_labels()
+    elif dataset == 'celebA':
+        n_classes = 2
+        label_colours = get_celebA_labels()
     else:
         raise NotImplementedError
 
@@ -67,6 +70,8 @@ def encode_segmap(mask):
     label_mask = label_mask.astype(int)
     return label_mask
 
+def get_celebA_labels():
+    return np.array([[0,0,0],[255,255,255]])
 
 def get_lfw_labels():
     return np.array([[0,0,0],[255,255,255]])
