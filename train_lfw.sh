@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python train.py --backbone resnet --lr 0.0001 --use-mixup True --mixup-alpha 0.4 --workers 1 --epochs 25 --batch-size 32 --gpu-ids 0 --checkname deeplab-resnet-usemixup0.4 --eval-interval 1 --dataset lfw
+CUDA_VISIBLE_DEVICES=0 python train.py --backbone resnet --lr 0.0001 --workers 1 --epochs 25 --batch-size 32 --gpu-ids 0 --checkname deeplab-resnet-testdataargu --eval-interval 1 --dataset lfw

@@ -2,7 +2,7 @@ import math
 import numbers
 import random
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageFilter
 import numpy as np
 
 
@@ -283,3 +283,50 @@ class SlidingCrop(object):
             img = Image.fromarray(img.astype(np.uint8)).convert('RGB')
             mask = Image.fromarray(mask.astype(np.uint8)).convert('P')
             return [img], [mask], [[0, sub_h, 0, sub_w, sub_h, sub_w]]
+
+        
+class RandomGaussianBlur(object):
+    def __call__(self, image, mask=None):
+        if random.random() < 0.5:
+            image = image.filter(ImageFilter.GaussianBlur(
+                radius=random.random()))
+
+        return image
+
+
+class FixScaleCrop(object):
+    def __init__(self, crop_size):
+        self.crop_size = crop_size
+
+    def __call__(self, image, mask):
+        w, h = image.size
+        if w > h:
+            oh = self.crop_size
+            ow = int(1.0 * w * oh / h)
+        else:
+            ow = self.crop_size
+            oh = int(1.0 * h * ow / w)
+        image = image.resize((ow, oh), Image.BILINEAR)
+        mask = mask.resize((ow, oh), Image.NEAREST)
+        # center crop
+        w, h = image.size
+        x1 = int(round((w - self.crop_size) / 2.))
+        y1 = int(round((h - self.crop_size) / 2.))
+        image = image.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+        mask = mask.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+
+        return image, mask
+
+
+class FixedResize(object):
+    def __init__(self, size):
+        self.size = (size, size)  # size: (h, w)
+
+    def __call__(self, image, mask):
+        assert img.size == mask.size
+
+        image = image.resize(self.size, Image.BILINEAR)
+        mask = mask.resize(self.size, Image.NEAREST)
+
+        return image, mask
+    

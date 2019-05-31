@@ -11,7 +11,6 @@ import torchvision.transforms as std_trnsf
 
 class LFWSegmentation(Dataset):
     NUM_CLASSES = 2
-    img_size = 256
     
     def __init__(self, args, root=Path.db_root_dir('lfw'), img_size = 256, split="train"):
         """
@@ -23,6 +22,7 @@ class LFWSegmentation(Dataset):
             gray_image (bool): True if to add gray images
         """
         self.split = split
+        self.args = args
         
         if self.split == 'train':
             txt_file = 'parts_train.txt'
@@ -40,9 +40,11 @@ class LFWSegmentation(Dataset):
         self.mask_path_list = [os.path.join(mask_dir, elem[1]+'.ppm') for elem in name_list]
         
         if self.split == 'train':
-            self.joint_transforms, self.image_transforms, self.mask_transforms = self.train_self_transform(img_size)
-        elif self.split == 'val' or self.split == 'test':
-            self.joint_transforms, self.image_transforms, self.mask_transforms = self.vt_self_transform(img_size)
+            self.joint_transforms, self.image_transforms, self.mask_transforms = self.train_transform(img_size)
+        elif self.split == 'val':
+            self.joint_transforms, self.image_transforms, self.mask_transforms = self.val_transform(img_size)
+        elif self.split == 'test':
+            self.joint_transforms, self.image_transforms, self.mask_transforms = self.test_transform(img_size)
         
 
     def __getitem__(self, idx):
@@ -75,26 +77,35 @@ class LFWSegmentation(Dataset):
     def __len__(self):
         return len(self.mask_path_list)
     
-    def train_self_transform(self, img_size):
+    def train_transform(self, img_size):
         # transforms on both image and mask
         train_joint_transforms = jnt_trnsf.Compose([
-        jnt_trnsf.RandomCrop(img_size),
+        jnt_trnsf.RandomCrop(self.args.crop_size),
         jnt_trnsf.RandomRotate(5),
         jnt_trnsf.RandomHorizontallyFlip()
         ])
 
         # transforms only on images
         train_image_transforms = std_trnsf.Compose([
+#         jnt_trnsf.RandomGaussianBlur(),
         std_trnsf.ColorJitter(0.05, 0.05, 0.05, 0.05),
         std_trnsf.ToTensor(),
         std_trnsf.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
     
-        test_joint_transforms = jnt_trnsf.Compose([
-        jnt_trnsf.Safe32Padding()
+        # transforms only on mask
+        mask_transforms = std_trnsf.Compose([
+        std_trnsf.ToTensor()
+        ])
+        
+        return train_joint_transforms, train_image_transforms, mask_transforms
+    
+    def val_transform(self, img_size):
+        val_joint_transforms = jnt_trnsf.Compose([
+        jnt_trnsf.FixScaleCrop(self.args.crop_size)
         ])
 
-        test_image_transforms = std_trnsf.Compose([
+        val_image_transforms = std_trnsf.Compose([
         std_trnsf.ToTensor(),
         std_trnsf.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
@@ -104,11 +115,11 @@ class LFWSegmentation(Dataset):
         std_trnsf.ToTensor()
         ])
         
-        return train_joint_transforms, train_image_transforms, mask_transforms
-    
-    def vt_self_transform(self, img_size):
+        return val_joint_transforms, val_image_transforms, mask_transforms
+
+    def test_transform(self, img_size):
         test_joint_transforms = jnt_trnsf.Compose([
-        jnt_trnsf.Safe32Padding()
+        jnt_trnsf.FixedResize(self.args.crop_size)
         ])
 
         test_image_transforms = std_trnsf.Compose([
