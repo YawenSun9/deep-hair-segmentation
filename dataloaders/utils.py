@@ -29,10 +29,13 @@ def decode_segmap(label_mask, dataset, plot=False):
         label_colours = get_cityscapes_labels()
     elif dataset == 'lfw':
         n_classes = 2
-        label_colours = get_lfw_labels()
+        label_colours = get_hair_labels()
     elif dataset == 'celebA':
         n_classes = 2
-        label_colours = get_celebA_labels()
+        label_colours = get_hair_labels()
+    elif dataset == 'lfw_celebA':
+        n_classes = 2
+        label_colours = get_hair_labels()
     else:
         raise NotImplementedError
 
@@ -70,10 +73,7 @@ def encode_segmap(mask):
     label_mask = label_mask.astype(int)
     return label_mask
 
-def get_celebA_labels():
-    return np.array([[0,0,0],[255,255,255]])
-
-def get_lfw_labels():
+def get_hair_labels():
     return np.array([[0,0,0],[255,255,255]])
 
 def get_cityscapes_labels():
