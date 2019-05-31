@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python train.py --backbone resnet --lr 0.0001 --workers 1 --epochs 25 --batch-size 32 --gpu-ids 0 --checkname deeplab-resnet-celebA-testdataarg --eval-interval 1 --dataset celebA
+CUDA_VISIBLE_DEVICES=0 python train.py --backbone mobilenet --lr 0.001 --workers 1 --epochs 100 --batch-size 128 --gpu-ids 0 --checkname deeplab-mobilenet-celebA_webcam --out-stride 16 --eval-interval 1 --dataset celebA
