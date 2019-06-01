@@ -62,7 +62,7 @@ if __name__ == "__main__":
                         choices=['resnet', 'xception', 'drn', 'mobilenet'],
                         help='backbone name (default: resnet)')
     parser.add_argument('--pretrained', type=str, 
-                        default='/Users/yulian/Downloads/resnet_model_best.pth.tar',
+                        default='/Users/yulian/Downloads/mixup_model_best.pth.tar',
                         help='pretrained model')
     parser.add_argument('--color', type=str, default='purple',
                         choices=['purple', 'green', 'blue', 'red'],

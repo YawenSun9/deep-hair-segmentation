@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python train.py --backbone mobilenet --lr 0.001 --workers 1 --epochs 100 --batch-size 64 --gpu-ids 0 --checkname deeplab-mobilenet-lfw_webcam --out-stride 16 --eval-interval 1 --dataset lfw
+CUDA_VISIBLE_DEVICES=0 python train.py --backbone mobilenet --lr 0.001 --workers 1 --epochs 100 --batch-size 16 --gpu-ids 0 --checkname deeplab-mobilenet-lfw_webcam --out-stride 16 --eval-interval 1 --dataset lfw
