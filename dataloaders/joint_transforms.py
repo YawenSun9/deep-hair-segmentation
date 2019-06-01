@@ -323,7 +323,7 @@ class FixedResize(object):
         self.size = (size, size)  # size: (h, w)
 
     def __call__(self, image, mask):
-        assert img.size == mask.size
+        assert image.size == mask.size
 
         image = image.resize(self.size, Image.BILINEAR)
         mask = mask.resize(self.size, Image.NEAREST)
