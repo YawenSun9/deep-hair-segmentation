@@ -64,22 +64,19 @@ class LFWSegmentation(Dataset):
         if self.mask_transforms is not None:
             mask = self.mask_transforms(mask)
 
-#         if self.gray_image:
-#             gray = img.convert('L')
-#             gray = np.array(gray,dtype=np.float32)[np.newaxis,]/255
-#             return img, mask, gray
         _, M, N = mask.shape
         sample = {'image': img, 'label': mask.resize_((M, N))}
-#         print('lfw', sample['image'].shape, sample['label'].shape)
         return sample
     
 
     def __len__(self):
+#         assert (self.mask_path_list == self.img_path_list)
         return len(self.mask_path_list)
     
     def train_transform(self, img_size):
         # transforms on both image and mask
         train_joint_transforms = jnt_trnsf.Compose([
+        jnt_trnsf.Resize((288, 288)),
         jnt_trnsf.RandomCrop(self.args.crop_size),
         jnt_trnsf.RandomRotate(5),
         jnt_trnsf.RandomHorizontallyFlip()
@@ -87,7 +84,7 @@ class LFWSegmentation(Dataset):
 
         # transforms only on images
         train_image_transforms = std_trnsf.Compose([
-#         jnt_trnsf.RandomGaussianBlur(),
+        jnt_trnsf.RandomGaussianBlur(),
         std_trnsf.ColorJitter(0.05, 0.05, 0.05, 0.05),
         std_trnsf.ToTensor(),
         std_trnsf.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])

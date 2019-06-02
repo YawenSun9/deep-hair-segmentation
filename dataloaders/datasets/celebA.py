@@ -67,11 +67,11 @@ class CelebASegmentation(Dataset):
 
         _, M, N = mask.shape
         sample = {'image': img, 'label': mask.resize_((M, N))}
-#         print('lfw', sample['image'].shape, sample['label'].shape)
         return sample
     
 
     def __len__(self):
+        assert (self.mask_path_list == self.img_path_list)
         return len(self.mask_path_list)
     
     def train_transform(self, img_size):
