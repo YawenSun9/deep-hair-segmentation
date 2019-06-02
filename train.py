@@ -227,7 +227,7 @@ def main():
                         metavar='N', help='dataloader threads')
     parser.add_argument('--base-size', type=int, default=513,
                         help='base image size')
-    parser.add_argument('--crop-size', type=int, default=227,
+    parser.add_argument('--crop-size', type=int, default=257,
                         help='crop image size')
     parser.add_argument('--sync-bn', type=bool, default=None,
                         help='whether to use sync bn (default: auto)')

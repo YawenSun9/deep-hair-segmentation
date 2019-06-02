@@ -173,7 +173,7 @@ class RandomRotate(object):
         self.degree = degree
 
     def __call__(self, img, mask):
-        rotate_degree = random.random() * 2 * self.degree - self.degree
+        rotate_degree = random.uniform(-1*self.degree, self.degree)
         return img.rotate(rotate_degree, Image.BILINEAR), mask.rotate(rotate_degree, Image.NEAREST)
 
 
