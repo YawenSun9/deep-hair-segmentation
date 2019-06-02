@@ -37,14 +37,14 @@ class Trainer(object):
                         sync_bn=args.sync_bn,
                         freeze_bn=args.freeze_bn)
 
-        train_params = [{'params': model.get_1x_lr_params(), 'lr': args.lr * 0.1},
-                        {'params': model.get_10x_lr_params(), 'lr': args.lr}]
+#         train_params = [{'params': model.get_1x_lr_params(), 'lr': args.lr},
+#                         {'params': model.get_10x_lr_params(), 'lr': args.lr*10}]
 
         # Define Optimizer
 #         optimizer = torch.optim.SGD(train_params, momentum=args.momentum,
 #                                     weight_decay=args.weight_decay, nesterov=args.nesterov)
-#         train_params = [{'params': model.get_10x_lr_params(), 'lr': args.lr}]
-        optimizer = torch.optim.Adam(train_params)
+        train_params = [{'params': model.get_10x_lr_params(), 'lr': args.lr}]
+        optimizer = torch.optim.Adam(train_params, weight_decay=self.args.weight_decay)
 
         # Define Criterion
         # whether to use class balanced weights
@@ -227,7 +227,7 @@ def main():
                         metavar='N', help='dataloader threads')
     parser.add_argument('--base-size', type=int, default=513,
                         help='base image size')
-    parser.add_argument('--crop-size', type=int, default=256,
+    parser.add_argument('--crop-size', type=int, default=257,
                         help='crop image size')
     parser.add_argument('--sync-bn', type=bool, default=None,
                         help='whether to use sync bn (default: auto)')
