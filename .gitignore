@@ -27,6 +27,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+data/Lfw
 data/Lfw/lfw_funneled/
 data/Lfw/parts_lfw_funneled_gt_images/
 data/celebA/celebA/
