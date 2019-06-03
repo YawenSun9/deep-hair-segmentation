@@ -37,13 +37,13 @@ class Trainer(object):
                         sync_bn=args.sync_bn,
                         freeze_bn=args.freeze_bn)
 
-#         train_params = [{'params': model.get_1x_lr_params(), 'lr': args.lr},
-#                         {'params': model.get_10x_lr_params(), 'lr': args.lr*10}]
+        train_params = [{'params': model.get_1x_lr_params(), 'lr': args.lr},
+                        {'params': model.get_10x_lr_params(), 'lr': args.lr*10}]
 
         # Define Optimizer
 #         optimizer = torch.optim.SGD(train_params, momentum=args.momentum,
 #                                     weight_decay=args.weight_decay, nesterov=args.nesterov)
-        train_params = [{'params': model.get_10x_lr_params(), 'lr': args.lr}]
+#         train_params = [{'params': model.get_10x_lr_params(), 'lr': args.lr}]
         optimizer = torch.optim.Adam(train_params, weight_decay=self.args.weight_decay)
 
         # Define Criterion
@@ -225,7 +225,7 @@ def main():
                         help='whether to use SBD dataset (default: False)')
     parser.add_argument('--workers', type=int, default=4,
                         metavar='N', help='dataloader threads')
-    parser.add_argument('--base-size', type=int, default=513,
+    parser.add_argument('--base-size', type=int, default=257,
                         help='base image size')
     parser.add_argument('--crop-size', type=int, default=257,
                         help='crop image size')

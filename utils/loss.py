@@ -24,12 +24,15 @@ class SegmentationLosses(object):
     def HairMatLoss(self, logit, target, weight=0.5):
         loss1 = self.CrossEntropyLoss(logit, target)
         loss2 = weight * self.GradientConsistencyLoss(logit, target.unsqueeze(dim=1))
-#         loss3 = weight * self.GradientConsistencyLoss(logit[:, 1:2, ...], target.unsqueeze(dim=1))
-#         print (loss1, loss2)
+#         print (loss1, weight *loss2)
         return  loss1 + weight * loss2
 
 
     def GradientConsistencyLoss(self, logit, target):
+        
+        logit1 = logit[:,0:1,...]
+        logit2 = logit[:,1:2,...]
+        
         sobel_kernel_x = torch.Tensor(
                     [[1.0, 0.0, -1.0],
                     [2.0, 0.0, -2.0],
@@ -40,8 +43,8 @@ class SegmentationLosses(object):
         
         N = target.shape[0]
         
-        I_x1 = F.conv2d(logit[:,0:1,...], sobel_kernel_x, padding = 1)
-        I_x2 = F.conv2d(logit[:,1:2,...], sobel_kernel_x, padding = 1)
+        I_x1 = F.conv2d(logit1, sobel_kernel_x, padding = 1)
+        I_x2 = F.conv2d(logit2, sobel_kernel_x, padding = 1)
         I_x = torch.cat([I_x1, I_x2], dim=1)
         M_x = F.conv2d(target, sobel_kernel_x, padding = 1)
 
@@ -53,17 +56,19 @@ class SegmentationLosses(object):
             sobel_kernel_y = sobel_kernel_y.cuda()
         sobel_kernel_y = sobel_kernel_y.view((1,1,3,3))
 
-        I_y1 = F.conv2d(logit[:,0:1,...], sobel_kernel_y, padding = 1)
-        I_y2 = F.conv2d(logit[:,1:2,...], sobel_kernel_y, padding = 1)
+        I_y1 = F.conv2d(logit1, sobel_kernel_y, padding = 1)
+        I_y2 = F.conv2d(logit2, sobel_kernel_y, padding = 1)
         I_y = torch.cat([I_y1, I_y2], dim=1)
         M_y = F.conv2d(target, sobel_kernel_y, padding = 1)
 
         Imag_pow = torch.pow(I_x,2) + torch.pow(I_y,2) + 1e-30
         Mmag_pow = torch.pow(M_x,2) + torch.pow(M_y,2) + 1e-30
         Mmag = torch.sqrt(Mmag_pow)
-
+        
+        mask = (target != self.ignore_index).float()
+        
         rang_grad = 1 - torch.pow(I_x*M_x + I_y*M_y,2) / Imag_pow / Mmag_pow
-        loss = torch.sum(torch.mul(Mmag, rang_grad))/torch.sum(Mmag)
+        loss = torch.sum(torch.mul(Mmag, rang_grad) * mask)/torch.sum(Mmag * mask)
 
         if self.batch_average:
             loss /= N

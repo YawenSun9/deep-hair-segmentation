@@ -330,3 +330,36 @@ class FixedResize(object):
 
         return image, mask
     
+    
+class RandomScaleCrop(object):
+    def __init__(self, base_size, crop_size, fill=255):
+        self.base_size = base_size
+        self.crop_size = crop_size
+        self.fill = fill
+
+    def __call__(self, img, mask):
+        # random scale (short edge)
+        short_size = random.randint(int(self.base_size * 0.5), int(self.base_size * 2.0))
+        w, h = img.size
+        if h > w:
+            ow = short_size
+            oh = int(1.0 * h * ow / w)
+        else:
+            oh = short_size
+            ow = int(1.0 * w * oh / h)
+        img = img.resize((ow, oh), Image.BILINEAR)
+        mask = mask.resize((ow, oh), Image.NEAREST)
+        # pad crop
+        if short_size < self.crop_size:
+            padh = self.crop_size - oh if oh < self.crop_size else 0
+            padw = self.crop_size - ow if ow < self.crop_size else 0
+            img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
+            mask = ImageOps.expand(mask, border=(0, 0, padw, padh), fill=self.fill)
+        # random crop crop_size
+        w, h = img.size
+        x1 = random.randint(0, w - self.crop_size)
+        y1 = random.randint(0, h - self.crop_size)
+        img = img.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+        mask = mask.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+
+        return img, mask

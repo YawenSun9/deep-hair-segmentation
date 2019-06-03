@@ -76,16 +76,17 @@ class LFWSegmentation(Dataset):
     def train_transform(self, img_size):
         # transforms on both image and mask
         train_joint_transforms = jnt_trnsf.Compose([
-        jnt_trnsf.Resize((320, 320)),
-        jnt_trnsf.RandomCrop(self.args.crop_size),
+        jnt_trnsf.RandomScaleCrop(self.args.base_size, self.args.crop_size),
+#         jnt_trnsf.Resize((320, 320)),
+#         jnt_trnsf.RandomCrop(self.args.crop_size),
         jnt_trnsf.RandomRotate(5),
         jnt_trnsf.RandomHorizontallyFlip()
         ])
 
         # transforms only on images
         train_image_transforms = std_trnsf.Compose([
-#         jnt_trnsf.RandomGaussianBlur(),
         std_trnsf.ColorJitter(0.05, 0.05, 0.05, 0.05),
+        jnt_trnsf.RandomGaussianBlur(),
         std_trnsf.ToTensor(),
         std_trnsf.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
