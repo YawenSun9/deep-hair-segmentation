@@ -307,7 +307,9 @@ def main():
     # default settings for epochs, batch_size and lr
     if args.epochs is None:
         epoches = {
-            'lfw': 30,
+            'lfw':100,
+            'celebA':100,
+            'lfw_celebA':100,
             'cityscapes': 200,
             'pascal': 50,
         }
@@ -321,7 +323,9 @@ def main():
 
     if args.lr is None:
         lrs = {
-            'lfw': 0.001,
+            'lfw': 0.0001,
+            'celebA':0.0001,
+            'lfw_celebA':0.0001,
             'cityscapes': 0.01,
             'pascal': 0.007,
         }
