@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python train.py --backbone resnet --lr 0.001 --workers 1 --epochs 100 --batch-size 24 --gpu-ids 0 --checkname deeplab-resnet-lfw_celebAteststride8 --out-stride 16 --eval-interval 1 --dataset lfw_celebA
+CUDA_VISIBLE_DEVICES=0 python train.py --backbone resnet --lr 0.0001 --workers 1 --epochs 200 --batch-size 32 --gpu-ids 0 --checkname deeplab-resnet-lfw_celebA_mixup0.2 --use-mixup True --weight-decay 0 --eval-interval 1 --dataset lfw_celebA
