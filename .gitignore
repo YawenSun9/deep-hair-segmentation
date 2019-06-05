@@ -30,8 +30,8 @@ MANIFEST
 #data/
 data/Lfw/lfw_funneled/
 data/Lfw/parts_lfw_funneled_gt_images/
-data/celebA/celebA/
-data/celebA/segmentation_masks/
+data/celebA/
+#data/celebA/segmentation_masks/
 data/VOCdevkit/
 *.tgz
 
