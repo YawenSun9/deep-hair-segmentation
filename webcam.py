@@ -34,14 +34,19 @@ def get_image_mask(image, net, size = 227):
     down_size_image = norm(down_size_image)
     down_size_image = np.transpose(down_size_image, (0, 3, 1, 2)).to(device)
     mask = net(down_size_image)
+    mask = torch.squeeze(mask).detach()
+    
+    maskexp = np.exp(mask)
+    prob = (maskexp[1] *255 / (maskexp[0] + maskexp[1] + 1e-30)).cpu().numpy().astype(np.int16)
 
-    mask = torch.argmax(torch.squeeze(mask), 0)
-    mask_cv2 = mask.data.cpu().numpy().astype(np.uint8) * 255
+    mask = torch.argmax(mask, 0)
+    mask_cv2 = mask.data.cpu().numpy().astype(np.int16)
     mask_cv2 = cv2.resize(mask_cv2, (resize, resize))
-    return image, mask_cv2
+    prob = cv2.resize(prob,  (resize, resize))
+    return image, mask_cv2, prob
 
 
-def color_image(image, mask, color):
+def color_image(image, mask, prob, color):
     c = None
     if color == 'purple':
         c = [30, 0, 10]
@@ -53,16 +58,17 @@ def color_image(image, mask, color):
         c = [10, 10, 30]
     hand = np.zeros((mask.shape[0], mask.shape[1], 3))
     hand[np.where(mask != 0)] = c
+    hand = hand * prob[...,np.newaxis] /255
     hand = hand.astype(np.uint8)
     return cv2.add(hand, image)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="webcam")
-    parser.add_argument('--backbone', type=str, default='resnet',
+    parser.add_argument('--backbone', type=str, default='mobilenet',
                         choices=['resnet', 'xception', 'drn', 'mobilenet'],
-                        help='backbone name (default: resnet)')
+                        help='backbone name (default: mobilenet)')
     parser.add_argument('--pretrained', type=str, 
-                        default='/Users/yulian/Downloads/mixup_model_best.pth.tar',
+                        default='model/mobilewebcam_model_best.pth.tar',
                         help='pretrained model')
     parser.add_argument('--color', type=str, default='purple',
                         choices=['purple', 'green', 'blue', 'red'],
@@ -82,9 +88,9 @@ if __name__ == "__main__":
         ret, image = cam.read()
 
         if (ret):
-            image, mask = get_image_mask(image, net)
+            image, mask, prob = get_image_mask(image, net)
             # print(image.shape, mask.shape)
-            add = color_image(image, mask, args.color)
+            add = color_image(image, mask, prob, args.color)
             cv2.imshow('frame', add)
             if cv2.waitKey(1) & 0xFF == ord(chr(27)):
                 break
