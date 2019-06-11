@@ -23,7 +23,8 @@ def fix_ratio_scale(image, size):
     
     return image, resize
 
-def get_image_mask(image, net, size = 227):
+def get_image_mask(image, net, size = 257):
+    mean = np.mean(image)
     image = cv2.flip(image, 1)
     image_h, image_w = image.shape[0], image.shape[1]
     image, resize = fix_ratio_scale(image, size)
@@ -43,6 +44,7 @@ def get_image_mask(image, net, size = 227):
     mask_cv2 = mask.data.cpu().numpy().astype(np.int16)
     mask_cv2 = cv2.resize(mask_cv2, (resize, resize))
     prob = cv2.resize(prob,  (resize, resize))
+    # prob = prob * mean / 100
     return image, mask_cv2, prob
 
 
@@ -50,12 +52,18 @@ def color_image(image, mask, prob, color):
     c = None
     if color == 'purple':
         c = [30, 0, 10]
+    elif color == 'grass':
+        c = [0, 25, 20]
     elif color == 'green':
         c = [5, 20, 5]
     elif color == 'blue':
         c = [30, 5, 0]
     elif color == 'red':
         c = [10, 10, 30]
+    elif color == 'rose':
+        c = [15, 5, 30]
+    # elif color == 'blond':
+    #     c = [10, 25, 28]
     hand = np.zeros((mask.shape[0], mask.shape[1], 3))
     hand[np.where(mask != 0)] = c
     hand = hand * prob[...,np.newaxis] /255
@@ -71,7 +79,7 @@ if __name__ == "__main__":
                         default='model/mobilewebcam_model_best.pth.tar',
                         help='pretrained model')
     parser.add_argument('--color', type=str, default='purple',
-                        choices=['purple', 'green', 'blue', 'red'],
+                        choices=['purple', 'green', 'blue', 'red', 'rose', 'grass'],
                         help='Color your hair (default: purple)')
     args = parser.parse_args()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
