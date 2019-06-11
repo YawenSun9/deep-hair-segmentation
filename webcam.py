@@ -24,7 +24,7 @@ def fix_ratio_scale(image, size):
     return image, resize
 
 def get_image_mask(image, net, size = 257):
-    mean = np.mean(image)
+    # mean = np.mean(image)
     image = cv2.flip(image, 1)
     image_h, image_w = image.shape[0], image.shape[1]
     image, resize = fix_ratio_scale(image, size)
